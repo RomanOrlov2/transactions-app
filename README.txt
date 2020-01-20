@@ -1,0 +1,1 @@
+Запускать через docker-compose. Если фоновая нагрузка не требуется, то исключить из docker-compose.yml application-load

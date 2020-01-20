@@ -1,0 +1,3 @@
+package com.unicorn.power.data
+
+data class Transaction(val amount: Double, val timestamp: Long)

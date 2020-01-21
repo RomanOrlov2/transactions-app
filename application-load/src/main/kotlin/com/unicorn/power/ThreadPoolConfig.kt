@@ -22,7 +22,7 @@ class ThreadPoolConfig {
                     val restTemplate = RestTemplate()
                     val transaction = Transaction(1000 * Math.random(), System.currentTimeMillis())
 //                    println("Сгенерирована и будет отправлена сущность $transaction")
-                    restTemplate.postForEntity("http://application:8080/api/transactions", transaction, Any::class.java)
+                    restTemplate.postForEntity("http://localhost:8080/api/transactions", transaction, Any::class.java)
                 } catch (e: Exception) {
                     println(e)
                 }

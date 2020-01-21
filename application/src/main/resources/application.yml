@@ -1,5 +1,8 @@
 spring:
   influx:
-    url: http://influxdb:8086
+    url: http://localhost:8086
     user: dev
     password: dev
+  profiles:
+    active:
+      - inmemory

@@ -2,7 +2,7 @@ package com.unicorn.power.controller
 
 import com.unicorn.power.data.Sample
 import com.unicorn.power.data.Transaction
-import com.unicorn.power.influxdb.DatabaseService
+import com.unicorn.power.service.TransactionService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
@@ -15,7 +15,7 @@ import java.time.ZoneId
 
 
 @RestController
-class TransactionsController(@Autowired val databaseService: DatabaseService) {
+class TransactionsController(@Autowired val transactionService: TransactionService) {
 
     @PostMapping("/api/transactions", consumes = [APPLICATION_JSON_VALUE])
     @ResponseBody
@@ -23,7 +23,7 @@ class TransactionsController(@Autowired val databaseService: DatabaseService) {
         val transactionDateTime =
             LocalDateTime.ofInstant(Instant.ofEpochMilli(transaction.timestamp), ZoneId.systemDefault())
         return if (transactionDateTime.isAfter(now().minusMinutes(1))) {
-            databaseService.saveTransaction(transaction)
+            transactionService.saveTransaction(transaction)
             ResponseEntity(HttpStatus.CREATED)
         } else {
             ResponseEntity(HttpStatus.NO_CONTENT)
@@ -31,5 +31,5 @@ class TransactionsController(@Autowired val databaseService: DatabaseService) {
     }
 
     @GetMapping("/api/statistics", consumes = [APPLICATION_JSON_VALUE], produces = [APPLICATION_JSON_VALUE])
-    fun sample(): Sample = databaseService.getSample()
+    fun sample(): Sample = transactionService.getSample()
 }

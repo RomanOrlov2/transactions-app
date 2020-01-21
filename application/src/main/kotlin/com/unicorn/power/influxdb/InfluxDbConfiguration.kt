@@ -8,10 +8,12 @@ import org.springframework.boot.autoconfigure.influx.InfluxDbProperties
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.context.annotation.Profile
 
 const val database: String = "transactions"
 const val retentionPolicy: String = "one_hour"
 
+@Profile("database")
 @Configuration
 @EnableConfigurationProperties(InfluxDbProperties::class)
 class InfluxDbConfiguration {

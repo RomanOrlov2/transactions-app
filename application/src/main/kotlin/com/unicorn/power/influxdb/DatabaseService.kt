@@ -10,6 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
+import java.math.BigDecimal.ZERO
+import java.math.BigDecimal.valueOf
 import java.util.concurrent.TimeUnit
 
 @Profile("database")
@@ -31,13 +33,13 @@ class DatabaseService(@Autowired val influxDB: InfluxDB): TransactionService {
         val results = queryResult.results[0].series?.get(0)?.values?.get(0)
         return if (results != null)
             Sample(
-                sum = results[1] as Double,
-                avg = results[2] as Double,
-                max = results[3] as Double,
-                min = results[4] as Double,
+                sum = valueOf(results[1] as Double),
+                avg = valueOf(results[2] as Double),
+                max = valueOf(results[3] as Double),
+                min = valueOf(results[4] as Double),
                 count = (results[5] as Double).toLong()
             )
         else
-            Sample(0.0, 0.0, 0.0, 0.0, 0)
+            Sample(ZERO, ZERO, ZERO, ZERO, 0)
     }
 }

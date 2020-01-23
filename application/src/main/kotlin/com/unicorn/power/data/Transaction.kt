@@ -1,3 +1,5 @@
 package com.unicorn.power.data
 
-data class Transaction(val amount: Double, val timestamp: Long)
+import java.math.BigDecimal
+
+data class Transaction(val amount: BigDecimal, val timestamp: Long)

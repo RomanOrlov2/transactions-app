@@ -4,6 +4,9 @@ import com.unicorn.power.data.Sample
 import com.unicorn.power.data.Transaction
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Service
+import java.math.BigDecimal
+import java.math.BigDecimal.valueOf
+import java.math.RoundingMode
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.LocalDateTime.now
@@ -19,7 +22,7 @@ class TransactionServiceImpl : TransactionService {
 
     override fun saveTransaction(transaction: Transaction) {
         val transactionDateTime =
-            LocalDateTime.ofInstant(Instant.ofEpochMilli(transaction.timestamp), ZoneId.systemDefault())
+            LocalDateTime.ofInstant(Instant.ofEpochMilli(transaction.timestamp), ZoneId.of("UTC"))
         // Если такой транзакции не существует, пытаемся её туда положить (Но параллельно могут начать её туда ложить два потока)
         val putIfAbsent = transactions.putIfAbsent(
             transactionDateTime,
@@ -32,14 +35,21 @@ class TransactionServiceImpl : TransactionService {
     }
 
     override fun getSample(): Sample {
-        val amounts =
-            transactions.tailMap(now().minusMinutes(1), true)
-                .flatMap(Map.Entry<LocalDateTime, List<Transaction>>::value)
-                .map { it.amount }
-                .toList()
-        amounts.apply {
-            return Sample(sum = sum(), avg = average(), max = max() ?: 0.0, min = min() ?: 0.0, count = size.toLong())
-        }
+        var sum = BigDecimal.ZERO
+        var min = BigDecimal.valueOf(Double.MAX_VALUE)
+        var max = BigDecimal.ZERO
+        var count: Long = 0
+        // tailMap возвращает не копию мапы, а просто хитро смотрит на слепок текущего состояния мапы.
+        transactions.tailMap(now(ZoneId.of("UTC")).minusMinutes(1), true).asSequence()
+            .map { it.value.asSequence() }
+            .flatten()
+            .forEach {
+                sum = sum.add(it.amount)
+                count++
+                min = minOf(min, it.amount)
+                max = maxOf(max, it.amount)
+            }
+        return Sample(sum = sum, avg = sum.divide(valueOf(count), RoundingMode.HALF_UP), max = max, min = min, count = count)
     }
 
     fun removeOldRecords(olderThen: LocalDateTime) {
